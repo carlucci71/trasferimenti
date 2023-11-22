@@ -1,5 +1,8 @@
 package it.daniele.transfermarket.controller;
 
+import it.daniele.transfermarket.entity.Transfer;
+import it.daniele.transfermarket.repository.TransferRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +15,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
@@ -20,7 +24,8 @@ import java.util.Set;
 public class TMController {
     List<String> squadre=new ArrayList<>();
     Random random = new Random();
-    Map<String, List<Map>> db=new HashMap<>();
+    @Autowired
+    TransferRepository transferRepository;
     @PostConstruct
     public void postC(){
         squadre.add("50 SFUMATURE DI GIGIO");
@@ -126,10 +131,14 @@ public class TMController {
     }
     @GetMapping("/{nome}")
     public ResponseEntity<List<Map>> trasferimenti(@PathVariable String nome){
-        List<Map> ret = db.get(nome);
-        if (ret==null) {
-            ret = new ArrayList<>();
-            Map<String, Object> map;
+        transferRepository.deleteAll();
+        String ret;
+        Optional<Transfer> byId = transferRepository.findById(nome);
+        if (byId.isPresent()) {
+            ret=byId.get().getPassaggi();
+        } else {
+            ret = new String();
+            String map;
             Calendar calendar = Calendar.getInstance();
             int annoCorrente = calendar.get(Calendar.YEAR);
             int annoPartenza = 1995;
@@ -137,18 +146,31 @@ public class TMController {
             String oldSquadra = null;
             String sq = null;
             while (anno < annoCorrente) {
-                map = new HashMap<>();
-                map.put("anno", anno);
+                map = new String();
+                //map.setAnno(anno);
+                map=String.valueOf(anno);
                 do {
                     oldSquadra = sq;
                     sq = squadre.get(random.nextInt(squadre.size()));
                 } while (sq.equals(oldSquadra));
-                map.put("squadra", sq);
+//                map.setSquadra(sq);
+                map=map + "@" + sq;
                 anno = random.nextInt(annoCorrente - anno) + anno + 1;
-                ret.add(map);
+                ret=ret +  map + "#";
             }
-            db.put(nome,ret);
+            Transfer t = new Transfer(nome, ret);
+            transferRepository.save(t);
         }
-        return ResponseEntity.ok(ret);
+        List<Map> ok=new ArrayList<>();
+        //#2013@STORTENHAM#2018@COCA KOLAROV
+        String[] split = ret.split("#");
+        for (String s : split) {
+               String[] split2 = s.split("@");
+               Map m = new HashMap();
+            m.put("anno", split2[0]);
+            m.put("squadra", split2[1]);
+            ok.add(m);
+        }
+        return ResponseEntity.ok(ok);
     }
 }
