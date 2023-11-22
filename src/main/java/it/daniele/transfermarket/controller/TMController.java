@@ -131,7 +131,7 @@ public class TMController {
     }
     @GetMapping("/{nome}")
     public ResponseEntity<List<Map>> trasferimenti(@PathVariable String nome){
-        transferRepository.deleteAll();
+        //transferRepository.deleteAll();
         String ret;
         Optional<Transfer> byId = transferRepository.findById(nome);
         if (byId.isPresent()) {
