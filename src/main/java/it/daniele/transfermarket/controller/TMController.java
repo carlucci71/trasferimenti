@@ -4,6 +4,8 @@ import it.daniele.transfermarket.entity.Squadra;
 import it.daniele.transfermarket.entity.Transfer;
 import it.daniele.transfermarket.repository.SquadraRepository;
 import it.daniele.transfermarket.repository.TransferRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 
 @RestController
 @RequestMapping("transfer")
 public class TMController {
+
+    private  final Logger logger= LoggerFactory.getLogger(this.getClass());
+
     List<Squadra> squadre=new ArrayList<>();
     Random random = new Random();
     @Autowired
@@ -38,7 +42,7 @@ public class TMController {
 
     @PostMapping("/inizializza")
     public ResponseEntity<?> inizializza(){
-	    System.out.println("INIZIO");
+	    logger.info("INIZIO");
         squadraRepository.deleteAll();
         squadraRepository.save(new Squadra("50 SFUMATURE DI GIGIO"));
         squadraRepository.save(new Squadra("ABATE BORISOV"));
@@ -147,7 +151,7 @@ public class TMController {
 
     @GetMapping("/{nome}")
     public ResponseEntity<List<Map>> trasferimenti(@PathVariable String nome){
-	    System.out.println("NOME");
+        logger.info("RICHIAMO {}", nome);
         String ret;
         Optional<Transfer> byId = transferRepository.findById(nome);
         if (byId.isPresent()) {
