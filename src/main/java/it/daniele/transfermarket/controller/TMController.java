@@ -38,6 +38,7 @@ public class TMController {
 
     @PostMapping("/inizializza")
     public ResponseEntity<?> inizializza(){
+	    System.out.println("INIZIO");
         squadraRepository.deleteAll();
         squadraRepository.save(new Squadra("50 SFUMATURE DI GIGIO"));
         squadraRepository.save(new Squadra("ABATE BORISOV"));
@@ -146,6 +147,7 @@ public class TMController {
 
     @GetMapping("/{nome}")
     public ResponseEntity<List<Map>> trasferimenti(@PathVariable String nome){
+	    System.out.println("NOME");
         String ret;
         Optional<Transfer> byId = transferRepository.findById(nome);
         if (byId.isPresent()) {
